@@ -215,6 +215,7 @@ void bl_dgemm(
   double *packA, *packB;
   char *str;
   int    ir, jr;
+  int  bl_ic_nt = 1;
 
   str = getenv( "BLISLAB_IC_NT" );
     if ( str != NULL ) {
