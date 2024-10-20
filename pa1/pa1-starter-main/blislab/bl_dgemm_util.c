@@ -177,3 +177,39 @@ double bl_clock_helper()
 #endif
 
 
+void bl_get_range( int n, int bf, int* start, int* end )
+{
+    int      n_way      = omp_get_num_threads();
+    int      work_id    = omp_get_thread_num();
+	int      all_start  = 0;
+	int      all_end    = n;
+	int      size       = all_end - all_start;
+	int      n_bf_whole = size / bf;
+	int      n_bf_left  = size % bf;
+	int      n_bf_lo    = n_bf_whole / n_way;
+	int      n_bf_hi    = n_bf_whole / n_way;
+
+		int n_th_lo = n_bf_whole % n_way;
+
+
+		if ( n_th_lo != 0 ) n_bf_lo += 1;
+
+		int size_lo = n_bf_lo * bf;
+		int size_hi = n_bf_hi * bf;
+
+		int lo_start = all_start;
+		int hi_start = all_start + n_th_lo * size_lo;
+
+		if ( work_id < n_th_lo )
+		{
+			*start = lo_start + (work_id  ) * size_lo;
+			*end   = lo_start + (work_id+1) * size_lo;
+		}
+		else
+		{
+			*start = hi_start + (work_id-n_th_lo  ) * size_hi;
+			*end   = hi_start + (work_id-n_th_lo+1) * size_hi;
+			if ( work_id == n_way - 1 ) *end += n_bf_left;
+		}
+	
+}
